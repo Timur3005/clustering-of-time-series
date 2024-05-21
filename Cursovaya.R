@@ -58,7 +58,7 @@ data$Inflation <- scale(data$Inflation)
 ts_data <- ts(data$Inflation, frequency = 12) # временной ряд с месячной частотой
 
 # K-means кластеризация
-kmeans_result <- kmeans(data$Inflation, centers = 3, nstart = 25)
+kmeans_result <- kmeans(data$Inflation, centers = 5, nstart = 25)
 
 # Добавление результатов кластеризации в данные
 data$Cluster <- factor(kmeans_result$cluster)
