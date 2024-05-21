@@ -51,3 +51,28 @@ data <- bind_rows(data_yearly, data_quarterly, data_monthly) %>% arrange(Date)
 # Заполнение пропущенных значений методом линейной интерполяции
 data <- data %>% complete(Date = seq(min(Date), max(Date), by="month")) %>% fill(Inflation, .direction = "downup")
 
+# Нормализация данных
+data$Inflation <- scale(data$Inflation)
+
+# Преобразование данных для кластеризации
+ts_data <- ts(data$Inflation, frequency = 12) # временной ряд с месячной частотой
+
+# K-means кластеризация
+kmeans_result <- kmeans(data$Inflation, centers = 3, nstart = 25)
+
+# Добавление результатов кластеризации в данные
+data$Cluster <- factor(kmeans_result$cluster)
+
+# Визуализация результатов
+library(ggplot2)
+ggplot(data, aes(x = Date, y = Inflation, color = Cluster)) +
+  geom_line() +
+  labs(title = "Clustering of Inflation Time Series", x = "Date", y = "Inflation", color = "Cluster") +
+  theme_minimal()
+
+# Вычисление индекса силуэта
+silhouette_score <- silhouette(kmeans_result$cluster, dist(data$Inflation))
+avg_silhouette_score <- mean(silhouette_score[, 3])
+
+# Печать среднего значения индекса силуэта
+print(paste("Average Silhouette Score:", avg_silhouette_score))
